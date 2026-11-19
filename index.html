@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>心理表象训练场</title>
+<title>心理表象实验室</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -13,35 +13,44 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   -webkit-font-smoothing:antialiased;
 }
-.wrap{max-width:860px;margin:0 auto;padding:56px 20px 60px}
+.wrap{max-width:880px;margin:0 auto;padding:56px 20px 60px}
 .eyebrow{font-size:12px;letter-spacing:3px;color:#5eead4;margin-bottom:14px}
-h1{font-size:clamp(26px,5vw,38px);margin:0 0 14px;line-height:1.25;letter-spacing:-.5px}
-h1 em{font-style:normal;background:linear-gradient(100deg,#5eead4,#38bdf8 60%,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
-.lede{font-size:15px;line-height:1.85;color:#8b9bb0;max-width:600px;margin:0 0 40px}
+h1{font-size:clamp(25px,5vw,36px);margin:0 0 14px;line-height:1.28;letter-spacing:-.5px}
+h1 em{font-style:normal;background:linear-gradient(100deg,#5eead4,#38bdf8 55%,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:15px;line-height:1.85;color:#8b9bb0;max-width:640px;margin:0 0 38px}
 .lede b{color:#c7d4e5;font-weight:600}
 .cards{display:grid;gap:16px}
-@media(min-width:680px){.cards{grid-template-columns:1fr 1fr}}
+@media(min-width:700px){.cards{grid-template-columns:1fr 1fr}}
 .card{
   display:block;text-decoration:none;color:inherit;position:relative;
   background:rgba(18,24,33,.8);border:1px solid #243043;border-radius:22px;
-  padding:26px 24px 24px;transition:all .22s;overflow:hidden;
+  padding:26px 24px 26px;transition:all .22s;overflow:hidden;
 }
 .card:before{
   content:"";position:absolute;inset:0;opacity:0;transition:opacity .22s;
-  background:radial-gradient(420px 200px at 30% 0%, rgba(94,234,212,.12), transparent 70%);
+  background:radial-gradient(420px 220px at 30% 0%, rgba(94,234,212,.12), transparent 70%);
 }
 .card:hover{border-color:#3b5b7a;transform:translateY(-3px)}
 .card:hover:before{opacity:1}
 .card .tag{font-size:11px;letter-spacing:2px;color:#5a6b82;margin-bottom:12px}
-.card h2{font-size:20px;margin:0 0 8px;letter-spacing:.2px}
-.card p{font-size:13.5px;line-height:1.75;color:#8b9bb0;margin:0 0 18px}
+.card h2{font-size:20px;margin:0 0 9px;letter-spacing:.2px}
+.card p{font-size:13.5px;line-height:1.78;color:#8b9bb0;margin:0 0 18px}
 .card .meta{display:flex;gap:8px;flex-wrap:wrap}
 .pill{font-size:11px;padding:4px 10px;border-radius:99px;background:#131c27;border:1px solid #22304a;color:#7d8ea6}
-.card .go{position:absolute;right:22px;bottom:22px;font-size:13px;color:#5eead4;opacity:0;transform:translateX(-6px);transition:all .22s}
+.card .go{position:absolute;right:24px;bottom:24px;font-size:13px;color:#5eead4;opacity:0;transform:translateX(-6px);transition:all .22s}
 .card:hover .go{opacity:1;transform:translateX(0)}
-.card.accent:before{background:radial-gradient(420px 200px at 30% 0%, rgba(56,189,248,.14), transparent 70%)}
-.card.accent .tag{color:#38bdf8}
-.card.accent .go{color:#38bdf8}
+.card.b:before{background:radial-gradient(420px 220px at 30% 0%, rgba(56,189,248,.14), transparent 70%)}
+.card.b .tag,.card.b .go{color:#38bdf8}
+.card.c{grid-column:1/-1}
+.card.c:before{background:radial-gradient(600px 220px at 25% 0%, rgba(167,139,250,.15), transparent 70%)}
+.card.c .tag,.card.c .go{color:#a78bfa}
+.card.c .inner{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.card.c .left{flex:1;min-width:240px}
+.card.c .right{flex:1;min-width:240px;display:grid;gap:8px}
+.row{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:#8b9bb0}
+.row .n{font-size:10px;color:#6b5bb8;width:16px;flex:none;padding-top:2px}
+.row .t{color:#c7d4e5}
+.row .t span{color:#5c6f88}
 .foot{margin-top:44px;padding-top:22px;border-top:1px solid #1a2230;font-size:12px;color:#4a5a6e;line-height:1.9}
 .foot b{color:#7d8ea6;font-weight:500}
 </style>
@@ -49,16 +58,16 @@ h1 em{font-style:normal;background:linear-gradient(100deg,#5eead4,#38bdf8 60%,#8
 <body>
 <div class="wrap">
   <div class="eyebrow">MENTAL IMAGERY · 心理表象</div>
-  <h1>两个可以量化你<em>「心眼」</em>的小游戏</h1>
+  <h1>把<em>「心眼」</em>变成可测量的东西</h1>
   <p class="lede">
     心理表象不是玄学，它有几个非常硬的测量指标：<b>心理旋转的速度</b>、<b>图像检查的距离效应</b>、
-    以及<b>主观清晰度与客观成绩的校准</b>。这两个小游戏把这三件事变成了可以玩的测试。
-    每次 12 试次，约一分钟，结束后给出带理论解释的报告。
+    <b>表征的动量</b>、以及<b>主观清晰度与客观成绩的校准</b>。
+    下面三个页面把认知心理学的经典范式做成了能直接玩的东西，结束时都会给出带理论解释的读数。
   </p>
 
   <div class="cards">
     <a class="card" href="./gym.html">
-      <div class="tag">GAME 01</div>
+      <div class="tag">TRAINING · 01</div>
       <h2>心眼训练场</h2>
       <p>旋转判断、变换重建、叠加重建。用斜率法估算你的心理旋转速度，并与经典文献的 60°/秒对比；同时给出「清晰感 vs 正确率」的校准表。</p>
       <div class="meta">
@@ -69,10 +78,10 @@ h1 em{font-style:normal;background:linear-gradient(100deg,#5eead4,#38bdf8 60%,#8
       <div class="go">进入 →</div>
     </a>
 
-    <a class="card accent" href="./scan.html">
-      <div class="tag">GAME 02</div>
+    <a class="card b" href="./scan.html">
+      <div class="tag">TRAINING · 02</div>
       <h2>心像测绘仪</h2>
-      <p>记住地图，遮蔽后在脑中把视线从 A 扫向 ★。测的是你脑中的图像<b>有没有真正的空间延展</b>——如果判断时间不随距离变长，说明你在算，而不是在看。</p>
+      <p>记住地图，遮蔽后在脑中把视线从 A 扫向 ★。测的是你脑中的图像有没有真正的空间延展——如果判断时间不随距离变长，说明你在算，而不是在看。</p>
       <div class="meta">
         <span class="pill">Kosslyn 扫描</span>
         <span class="pill">距离效应</span>
@@ -80,10 +89,31 @@ h1 em{font-style:normal;background:linear-gradient(100deg,#5eead4,#38bdf8 60%,#8
       </div>
       <div class="go">进入 →</div>
     </a>
+
+    <a class="card c" href="./lab.html">
+      <div class="tag">EXPERIMENT · 03</div>
+      <div class="inner">
+        <div class="left">
+          <h2>实验台</h2>
+          <p>三个经典范式的忠实复现，按原论文的程序与参数来：Cooper–Shepard 的字符旋转、Freyd 的表征动量、Shepard–Feng 的心理折叠。每个都直接跑出原论文里的那条曲线或那个误差。</p>
+          <div class="meta">
+            <span class="pill">Cooper–Shepard 1973</span>
+            <span class="pill">Freyd 1993</span>
+            <span class="pill">Shepard–Feng 1972</span>
+          </div>
+        </div>
+        <div class="right">
+          <div class="row"><span class="n">①</span><span class="t">字符旋转 <span>— RT × 角度曲线，斜率反推 °/秒</span></span></div>
+          <div class="row"><span class="n">②</span><span class="t">表征动量 <span>— 沿运动方向的带符号前移量</span></span></div>
+          <div class="row"><span class="n">③</span><span class="t">心理折叠 <span>— 折后孔位重建，含重叠合并</span></span></div>
+        </div>
+      </div>
+      <div class="go">进入 →</div>
+    </a>
   </div>
 
   <div class="foot">
-    <b>怎么玩才有用：</b>每局 12 试次，每天 3–5 局。别盯着「清晰度」自评看——它在训练中几乎不动；
+    <b>怎么玩才有用：</b>每局 12 试次左右，每天 3–5 局。别盯着「清晰度」自评看——它在训练中几乎不动；
     该看的是同一难度下的正确率与耗时曲线，以及高自信与低自信时正确率的差距是否在缩小。
   </div>
 </div>
