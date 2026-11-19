@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>心理表象训练场</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 700px at 50% -20%, #17233a 0%, #090d12 60%);
+  color:#e8eef7;min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:860px;margin:0 auto;padding:56px 20px 60px}
+.eyebrow{font-size:12px;letter-spacing:3px;color:#5eead4;margin-bottom:14px}
+h1{font-size:clamp(26px,5vw,38px);margin:0 0 14px;line-height:1.25;letter-spacing:-.5px}
+h1 em{font-style:normal;background:linear-gradient(100deg,#5eead4,#38bdf8 60%,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:15px;line-height:1.85;color:#8b9bb0;max-width:600px;margin:0 0 40px}
+.lede b{color:#c7d4e5;font-weight:600}
+.cards{display:grid;gap:16px}
+@media(min-width:680px){.cards{grid-template-columns:1fr 1fr}}
+.card{
+  display:block;text-decoration:none;color:inherit;position:relative;
+  background:rgba(18,24,33,.8);border:1px solid #243043;border-radius:22px;
+  padding:26px 24px 24px;transition:all .22s;overflow:hidden;
+}
+.card:before{
+  content:"";position:absolute;inset:0;opacity:0;transition:opacity .22s;
+  background:radial-gradient(420px 200px at 30% 0%, rgba(94,234,212,.12), transparent 70%);
+}
+.card:hover{border-color:#3b5b7a;transform:translateY(-3px)}
+.card:hover:before{opacity:1}
+.card .tag{font-size:11px;letter-spacing:2px;color:#5a6b82;margin-bottom:12px}
+.card h2{font-size:20px;margin:0 0 8px;letter-spacing:.2px}
+.card p{font-size:13.5px;line-height:1.75;color:#8b9bb0;margin:0 0 18px}
+.card .meta{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-size:11px;padding:4px 10px;border-radius:99px;background:#131c27;border:1px solid #22304a;color:#7d8ea6}
+.card .go{position:absolute;right:22px;bottom:22px;font-size:13px;color:#5eead4;opacity:0;transform:translateX(-6px);transition:all .22s}
+.card:hover .go{opacity:1;transform:translateX(0)}
+.card.accent:before{background:radial-gradient(420px 200px at 30% 0%, rgba(56,189,248,.14), transparent 70%)}
+.card.accent .tag{color:#38bdf8}
+.card.accent .go{color:#38bdf8}
+.foot{margin-top:44px;padding-top:22px;border-top:1px solid #1a2230;font-size:12px;color:#4a5a6e;line-height:1.9}
+.foot b{color:#7d8ea6;font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">MENTAL IMAGERY · 心理表象</div>
+  <h1>两个可以量化你<em>「心眼」</em>的小游戏</h1>
+  <p class="lede">
+    心理表象不是玄学，它有几个非常硬的测量指标：<b>心理旋转的速度</b>、<b>图像检查的距离效应</b>、
+    以及<b>主观清晰度与客观成绩的校准</b>。这两个小游戏把这三件事变成了可以玩的测试。
+    每次 12 试次，约一分钟，结束后给出带理论解释的报告。
+  </p>
+
+  <div class="cards">
+    <a class="card" href="./gym.html">
+      <div class="tag">GAME 01</div>
+      <h2>心眼训练场</h2>
+      <p>旋转判断、变换重建、叠加重建。用斜率法估算你的心理旋转速度，并与经典文献的 60°/秒对比；同时给出「清晰感 vs 正确率」的校准表。</p>
+      <div class="meta">
+        <span class="pill">Shepard–Metzler</span>
+        <span class="pill">客观校准</span>
+        <span class="pill">3 模式</span>
+      </div>
+      <div class="go">进入 →</div>
+    </a>
+
+    <a class="card accent" href="./scan.html">
+      <div class="tag">GAME 02</div>
+      <h2>心像测绘仪</h2>
+      <p>记住地图，遮蔽后在脑中把视线从 A 扫向 ★。测的是你脑中的图像<b>有没有真正的空间延展</b>——如果判断时间不随距离变长，说明你在算，而不是在看。</p>
+      <div class="meta">
+        <span class="pill">Kosslyn 扫描</span>
+        <span class="pill">距离效应</span>
+        <span class="pill">单键反应时</span>
+      </div>
+      <div class="go">进入 →</div>
+    </a>
+  </div>
+
+  <div class="foot">
+    <b>怎么玩才有用：</b>每局 12 试次，每天 3–5 局。别盯着「清晰度」自评看——它在训练中几乎不动；
+    该看的是同一难度下的正确率与耗时曲线，以及高自信与低自信时正确率的差距是否在缩小。
+  </div>
+</div>
+</body>
+</html>

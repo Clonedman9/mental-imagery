@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>心像测绘仪 · 心智扫描训练</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1100px 620px at 50% -12%, #101d33 0%, #0a0e14 62%);
+  color:#e8eef7;min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+.wrap{max-width:820px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:19px;margin:0;letter-spacing:.4px}
+h1 span{color:#7dd3fc}
+.sub{font-size:12px;color:#7d8ea6}
+.hud{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:#111823;border:1px solid #22304a;border-radius:10px;padding:6px 12px;font-size:12px;color:#7d8ea6;display:flex;gap:6px;align-items:center}
+.chip b{color:#e8eef7;font-variant-numeric:tabular-nums}
+.panel{background:rgba(17,24,35,.85);border:1px solid #22304a;border-radius:20px;padding:18px;backdrop-filter:blur(8px)}
+.instr{text-align:center;font-size:14px;line-height:1.75;color:#c3d0e2;margin-bottom:14px;min-height:26px}
+.instr em{color:#7dd3fc;font-style:normal;font-weight:600}
+.instr .warn{color:#fbbf24}
+#stage{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.grid{
+  display:grid;grid-template-columns:repeat(var(--n),1fr);grid-auto-rows:1fr;
+  gap:5px;width:100%;max-width:330px;margin:0 auto;padding:8px;
+  background:#0d141d;border-radius:16px;border:1px solid #1b2637;aspect-ratio:1;
+}
+.cell{
+  border-radius:8px;background:#0a1017;border:1px solid #18222f;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(11px,3.2vw,16px);font-weight:700;color:#5c6f88;
+  transition:all .18s;position:relative;
+}
+.cell.lmA{background:linear-gradient(140deg,#5eead4,#22d3ee);color:#052027;border-color:transparent;box-shadow:0 0 14px rgba(94,234,212,.35)}
+.cell.lmB{background:linear-gradient(140deg,#a78bfa,#818cf8);color:#120a2a;border-color:transparent;box-shadow:0 0 14px rgba(167,139,250,.35)}
+.cell.lmP{background:linear-gradient(140deg,#fbbf24,#f59e0b);color:#2a1a00;border-color:transparent;box-shadow:0 0 14px rgba(251,191,36,.4)}
+.cell.dc{background:#141d29;color:#4b5c74;border-color:#1e2a3a}
+@keyframes pop{from{transform:scale(.55);opacity:0}to{transform:scale(1);opacity:1}}
+.cell.line{animation:pop .22s both;background:rgba(125,211,252,.20);border-color:rgba(125,211,252,.55);color:#7dd3fc}
+.cell.lineOn{background:linear-gradient(140deg,#38bdf8,#0ea5e9);color:#04141f;border-color:transparent}
+.cell.good{outline:2px solid #34d399;outline-offset:1px}
+.cell.bad{outline:2px solid #f87171;outline-offset:1px}
+.mask{font-size:13px;color:#5c6f88;letter-spacing:4px;text-align:center;padding:60px 0}
+.noise{width:100%;max-width:330px;aspect-ratio:1;border-radius:16px;border:1px solid #1b2637;
+  background:repeating-linear-gradient(45deg,#0d141d 0 10px,#16202d 10px 20px);
+  display:flex;align-items:center;justify-content:center;color:#5c6f88;font-size:12px;letter-spacing:2px;animation:flick .35s infinite alternate}
+@keyframes flick{from{opacity:.45}to{opacity:1}}
+.q{font-size:16px;text-align:center;line-height:1.8;color:#e8eef7}
+.q b{color:#fbbf24}
+.answers{display:flex;gap:12px;justify-content:center;width:100%;max-width:400px}
+.answers button{
+  flex:1;padding:15px;border-radius:14px;border:1px solid #22304a;background:#141d29;
+  color:#e8eef7;font-size:15px;cursor:pointer;font-family:inherit;transition:all .13s;
+}
+.answers button:hover{background:#1a2634;border-color:#34506f}
+.answers button:active{transform:scale(.97)}
+.answers button small{display:block;color:#5c6f88;font-size:11px;margin-top:3px}
+.fb{text-align:center;font-size:14px;min-height:22px;font-weight:600}
+.fb.ok{color:#34d399}.fb.bad{color:#f87171}
+.opts{margin-top:14px;text-align:center;font-size:12.5px;color:#7d8ea6}
+.opts label{cursor:pointer;user-select:none}
+.opts input{accent-color:#38bdf8;vertical-align:-2px;margin-right:4px}
+.overlay{position:fixed;inset:0;background:rgba(4,7,11,.84);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+.sheet{background:#101823;border:1px solid #22304a;border-radius:22px;padding:24px;max-width:520px;width:100%;max-height:86vh;overflow:auto}
+.sheet h2{margin:0 0 4px;font-size:18px}
+.sheet .hint{font-size:12px;color:#5c6f88;margin-bottom:16px}
+.statGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:#0c131c;border:1px solid #1b2637;border-radius:13px;padding:12px}
+.stat .k{font-size:11px;color:#5c6f88;margin-bottom:5px}
+.stat .v{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:11px;color:#5c6f88;font-weight:400;margin-left:2px}
+.note{font-size:12.5px;color:#8b9bb0;line-height:1.85;background:#0c131c;border-left:2px solid #7dd3fc;border-radius:0 10px 10px 0;padding:11px 13px;margin-bottom:16px}
+.controls{display:flex;gap:10px;justify-content:center;width:100%}
+.controls button{
+  flex:1;padding:13px;border-radius:13px;border:1px solid #22304a;background:#141d29;
+  color:#e8eef7;font-size:14px;cursor:pointer;font-family:inherit;
+}
+.controls button.primary{background:linear-gradient(140deg,#38bdf8,#0ea5e9);color:#04141f;border-color:transparent;font-weight:600}
+footer{text-align:center;margin-top:18px;font-size:11px;color:#3a4759}
+footer button{background:none;border:none;color:#7dd3fc;font-size:11px;cursor:pointer;text-decoration:underline;font-family:inherit}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 14px}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #1b2637;font-variant-numeric:tabular-nums}
+th{color:#5c6f88;font-weight:500;font-size:11px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>心像测绘仪 <span>·</span> 心智扫描</h1>
+    <div class="sub">记图 → 遮蔽 → 判断直线是否穿过 ★</div>
+  </header>
+
+  <div class="hud">
+    <div class="chip">试次 <b id="hTrial">0/12</b></div>
+    <div class="chip">等级 <b id="hLevel">Lv.1</b></div>
+    <div class="chip">连击 <b id="hStreak">0</b></div>
+    <div class="chip">得分 <b id="hScore">0</b></div>
+  </div>
+
+  <div class="panel">
+    <div class="instr" id="instr"></div>
+    <div id="stage"></div>
+  </div>
+
+  <div class="opts">
+    <label><input type="checkbox" id="intf"/> 干扰模式：遮蔽后插入 2 秒视觉干扰</label>
+  </div>
+
+  <footer><button id="theoryBtn">这个测的是什么</button></footer>
+</div>
+
+<div class="overlay hidden" id="summary">
+  <div class="sheet">
+    <h2>本局报告</h2>
+    <div class="hint" id="sumHint"></div>
+    <div class="statGrid" id="sumStats"></div>
+    <div id="sumExtra"></div>
+    <div class="note" id="sumNote"></div>
+    <div class="controls"><button id="againBtn" class="primary">再来一局</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="theory">
+  <div class="sheet">
+    <h2>这个测的是什么</h2>
+    <div class="hint">Kosslyn 地图扫描范式的可玩化版本</div>
+    <div class="note">
+      <b>核心逻辑</b>：给你一张地图，遮蔽后问「从 A 到 B 的直线会穿过 ★ 吗」。★ 到 A 的距离被系统性地操控。
+      如果你是在“脑内扫过去”，那么扫描时间应与距离成正比 —— 越远越慢；如果你是在“算”（比较坐标、数格子），
+      时间就与距离无关。
+    </div>
+    <table>
+      <tr><th>读数</th><th>含义</th></tr>
+      <tr><td>RT–距离斜率</td><td>每增加一格需要的毫秒数，即扫描速度</td></tr>
+      <tr><td>近距 vs 远距 RT 差</td><td>&gt;150ms 提示存在真实的距离效应</td></tr>
+      <tr><td>斜率≈0</td><td>更可能是命题式/解析式判断，而非图像扫描</td></tr>
+      <tr><td>干扰模式下正确率下降</td><td>表象维持占用视空间资源，被视觉干扰挤掉</td></tr>
+    </table>
+    <div class="note">
+      这正是 Pylyshyn 与 Kosslyn 之争的可操作判据：<b>距离效应</b>是否存在，是“图像介质”最直接的 behavioral 证据之一。
+      训练目标是让扫描更快更准 —— 但注意，速度提升也可能意味着你改用了更省事的解析策略，所以要看斜率有没有被“抹平”。
+    </div>
+    <div class="controls"><button id="theoryClose" class="primary">明白了</button></div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const K=(r,c)=>r+','+c;
+const pk=k=>k.split(',').map(Number);
+let timers=[];
+const after=(ms,fn)=>{const t=setTimeout(fn,ms);timers.push(t);return t;};
+const clearTimers=()=>{timers.forEach(clearTimeout);timers=[];};
+
+function lineCells(r0,c0,r1,c1){
+  const out=[];let dx=Math.abs(c1-c0),dy=Math.abs(r1-r0);
+  let sx=c0<c1?1:-1,sy=r0<r1?1:-1,err=dx-dy,r=r0,c=c0;
+  let guard=0;
+  while(guard++<200){
+    out.push(K(r,c));
+    if(r===r1&&c===c1)break;
+    const e2=2*err;
+    if(e2>-dy){err-=dy;c+=sx;}
+    if(e2<dx){err+=dx;r+=sy;}
+  }
+  return out;
+}
+
+const TRIALS=12;
+let session={trials:[],level:1,score:0,streak:0,correctRun:0,wrongRun:0,count:0};
+const Scan={N:5,A:null,B:null,P:null,onLine:true,dist:0,line:[],lineSet:new Set(),
+  decoys:[],phase:'idle',t0:0,answered:false};
+
+function updateHUD(){
+  $('#hTrial').textContent=session.count+'/'+TRIALS;
+  $('#hLevel').textContent='Lv.'+session.level;
+  $('#hStreak').textContent=session.streak;
+  $('#hScore').textContent=session.score;
+}
+
+function buildMap(N){
+  const g=document.createElement('div');
+  g.className='grid';g.style.setProperty('--n',N);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const d=document.createElement('div');
+    d.className='cell';d.dataset.k=K(r,c);
+    g.appendChild(d);
+  }
+  return g;
+}
+function cellOf(g,k){return g.querySelector('[data-k="'+k+'"]');}
+
+function paintStudy(g){
+  cellOf(g,Scan.A).classList.add('lmA');
+  cellOf(g,Scan.A).textContent='A';
+  cellOf(g,Scan.B).classList.add('lmB');
+  cellOf(g,Scan.B).textContent='B';
+  cellOf(g,Scan.P).classList.add('lmP');
+  cellOf(g,Scan.P).textContent='★';
+  Scan.decoys.forEach(d=>{
+    const el=cellOf(g,d.k);
+    if(el){el.classList.add('dc');el.textContent=d.g;}
+  });
+}
+function paintReveal(g){
+  Scan.line.forEach((k,i)=>{
+    const el=cellOf(g,k);
+    if(!el)return;
+    el.classList.add('line');
+    el.style.animationDelay=(i*32)+'ms';
+    el.textContent='';
+  });
+  const a=cellOf(g,Scan.A);a.className='cell lmA';a.textContent='A';a.style.animationDelay='0ms';
+  const b=cellOf(g,Scan.B);b.className='cell lmB';b.textContent='B';b.style.animationDelay='0ms';
+  const p=cellOf(g,Scan.P);
+  p.className='cell '+(Scan.onLine?'lineOn':'lmP');
+  if(!Scan.onLine)p.classList.add('bad');
+  p.textContent='★';
+  Scan.decoys.forEach(d=>{
+    const el=cellOf(g,d.k);
+    if(el){el.className='cell dc';el.textContent=d.g;}
+  });
+}
+
+function newTrial(){
+  if(session.count>=TRIALS)return;
+  clearTimers();
+  Scan.answered=false;
+  const lv=session.level;
+  Scan.N=clamp(5+Math.floor((lv-1)/3),5,7);
+  const studyMs=clamp(2900-lv*160,1500,2900);
+  const nDecoy=clamp(1+Math.floor(lv/2),1,5);
+
+  let A,B,line;
+  let guard=0;
+  do{
+    A=[randInt(0,Scan.N-1),randInt(0,Scan.N-1)];
+    B=[randInt(0,Scan.N-1),randInt(0,Scan.N-1)];
+    line=lineCells(A[0],A[1],B[0],B[1]);
+    guard++;
+  }while((Math.abs(A[0]-B[0])+Math.abs(A[1]-B[1])<Math.max(4,Scan.N-1)||line.length<4)&&guard<200);
+
+  Scan.A=K(A[0],A[1]);
+  Scan.B=K(B[0],B[1]);
+  Scan.line=line;
+  Scan.lineSet=new Set(line);
+
+  const L=line.length;
+  const near=[],far=[];
+  for(let i=1;i<L-1;i++){ if(i<=Math.floor(L*0.4))near.push(i); else if(i>=Math.ceil(L*0.6))far.push(i); }
+  const pool=(near.length&&far.length)?(Math.random()<0.5?near:far):(near.length?near:far.length?far:[Math.max(1,Math.floor(L/2))]);
+  const idx=pick(pool);
+
+  Scan.onLine=Math.random()<0.5;
+  if(Scan.onLine){
+    Scan.P=line[idx];
+  }else{
+    const [r,c]=pk(line[idx]);
+    const cands=[];
+    for(const [dr,dc] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nr>=Scan.N||nc<0||nc>=Scan.N)continue;
+      const k=K(nr,nc);
+      if(Scan.lineSet.has(k)||k===Scan.A||k===Scan.B)continue;
+      cands.push(k);
+    }
+    if(!cands.length){Scan.onLine=true;Scan.P=line[idx];}
+    else Scan.P=pick(cands);
+  }
+  Scan.dist=idx;
+
+  const used=new Set([Scan.A,Scan.B,Scan.P,...line]);
+  const glyphs=['●','◆','■','▲','○','◇'];
+  Scan.decoys=[];
+  let dg=0;
+  while(Scan.decoys.length<nDecoy&&dg++<200){
+    const k=K(randInt(0,Scan.N-1),randInt(0,Scan.N-1));
+    if(used.has(k))continue;
+    used.add(k);
+    Scan.decoys.push({k,g:pick(glyphs)});
+  }
+
+  Scan.phase='study';
+  const st=$('#stage');st.innerHTML='';
+  const g=buildMap(Scan.N);
+  st.appendChild(g);
+  paintStudy(g);
+  $('#instr').innerHTML='记住 <em>A</em>、<em>B</em>、<em>★</em> 与其他地标的位置 —— 随后地图会消失';
+
+  after(studyMs,()=>{
+    Scan.phase='blank';
+    st.innerHTML='<div class="mask">· · · 遮 蔽 · · ·</div>';
+    $('#instr').textContent='';
+
+    const useIntf=$('#intf').checked;
+    if(useIntf){
+      after(280,()=>{
+        st.innerHTML='';
+        const n=document.createElement('div');
+        n.className='noise';
+        n.textContent='视觉干扰中';
+        st.appendChild(n);
+        $('#instr').innerHTML='<span class="warn">保持脑中的地图不要散掉</span>';
+        after(2000,showQuestion);
+      });
+    }else{
+      after(420,showQuestion);
+    }
+  });
+}
+
+function showQuestion(){
+  Scan.phase='probe';
+  const st=$('#stage');st.innerHTML='';
+  const q=document.createElement('div');
+  q.className='q';
+  q.innerHTML='从 <b>A</b> 到 <b>B</b> 的直线，<br/>会穿过 <b>★</b> 所在的格子吗？';
+  st.appendChild(q);
+  const ans=document.createElement('div');
+  ans.className='answers';
+  ans.innerHTML='<button data-a="1">会<small>按 1 或 ←</small></button><button data-a="0">不会<small>按 2 或 →</small></button>';
+  st.appendChild(ans);
+  const fb=document.createElement('div');
+  fb.className='fb';fb.id='fb';
+  st.appendChild(fb);
+  ans.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>answer(b.dataset.a==='1'));
+  });
+  $('#instr').innerHTML='凭脑中的地图作答：<em>A—B 直线是否经过 ★</em>';
+  Scan.t0=performance.now();
+}
+
+function answer(saysYes){
+  if(Scan.phase!=='probe')return;
+  Scan.phase='feedback';
+  const rt=performance.now()-Scan.t0;
+  const correct=(saysYes===Scan.onLine);
+  const st=$('#stage');st.innerHTML='';
+  const g=buildMap(Scan.N);
+  st.appendChild(g);
+  paintReveal(g);
+  const fb=document.createElement('div');
+  fb.className='fb '+(correct?'ok':'bad');
+  fb.textContent=correct
+    ? ('✓ 正确 · 用时 '+(rt/1000).toFixed(2)+'s')
+    : ('✗ 错误 · 直线'+(Scan.onLine?'确实经过':'并未经过')+' ★');
+  st.appendChild(fb);
+  $('#instr').innerHTML='蓝线是真实连线，供你校准脑中的图像';
+
+  const ended=record({correct,rt,dist:Scan.dist,onLine:Scan.onLine,level:session.level});
+  if(!ended)after(1250,newTrial);
+}
+
+function record(rec){
+  session.trials.push(rec);
+  session.count++;
+  if(rec.correct){
+    session.streak++;session.correctRun++;session.wrongRun=0;
+    session.score+=Math.round(10*(1+session.streak*0.1));
+  }else{
+    session.streak=0;session.wrongRun++;session.correctRun=0;
+  }
+  if(session.correctRun>=3&&session.level<8){session.level++;session.correctRun=0;}
+  if(session.wrongRun>=2&&session.level>1){session.level--;session.wrongRun=0;}
+  updateHUD();
+  if(session.count>=TRIALS){after(900,showSummary);return true;}
+  return false;
+}
+
+function linreg(xs,ys){
+  const n=xs.length;if(n<3)return null;
+  const mx=xs.reduce((a,b)=>a+b,0)/n,my=ys.reduce((a,b)=>a+b,0)/n;
+  let num=0,den=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)**2;}
+  if(den===0)return null;
+  const b=num/den;return{slope:b,intercept:my-b*mx};
+}
+function showSummary(){
+  clearTimers();
+  const t=session.trials;
+  if(!t.length)return;
+  const n=t.length;
+  const acc=Math.round(t.filter(x=>x.correct).length/n*100);
+  const rts=t.map(x=>x.rt).filter(x=>x<20000);
+  const meanRt=Math.round(rts.reduce((a,b)=>a+b,0)/rts.length);
+
+  let stats=[
+    ['正确率',acc+'<small>%</small>'],
+    ['平均反应时',(meanRt/1000).toFixed(2)+'<small>s</small>'],
+    ['最终等级','Lv.'+session.level],
+    ['得分',session.score]
+  ];
+
+  const xs=t.map(x=>x.dist),ys=t.map(x=>x.rt);
+  const fit=linreg(xs,ys);
+  let extra='',note='';
+
+  const half=Math.ceil(Math.max.apply(null,t.map(x=>x.dist))/2)||1;
+  const near=t.filter(x=>x.dist<=half),far=t.filter(x=>x.dist>half);
+  const avg=a=>a.length?a.reduce((s,x)=>s+x.rt,0)/a.length:null;
+  const nRT=avg(near),fRT=avg(far);
+  const diff=(nRT!==null&&fRT!==null)?Math.round(fRT-nRT):null;
+
+  if(diff!==null){
+    extra='<table><tr><th>距离分组</th><th>试次</th><th>平均反应时</th></tr>'+
+      '<tr><td>近（≤'+half+' 格）</td><td>'+near.length+'</td><td>'+(nRT/1000).toFixed(2)+'s</td></tr>'+
+      '<tr><td>远（&gt;'+half+' 格）</td><td>'+far.length+'</td><td>'+(fRT/1000).toFixed(2)+'s</td></tr>'+
+      '<tr><td><b>远 − 近</b></td><td>—</td><td><b>'+(diff>0?'+':'')+diff+'ms</b></td></tr></table>';
+    if(fit&&fit.slope>1){
+      stats[3]=['扫描速率','约 '+(1000/fit.slope).toFixed(1)+'<small>格/秒</small>'];
+      note='检测到距离效应：★ 离 A 越远，你判断得越慢（每格约多花 '+Math.round(fit.slope)+
+        ' 毫秒）。这是典型的<b>图像扫描</b>特征 —— 你确实在脑内把视线从 A 移向 ★。';
+    }else{
+      note='距离效应不明显（远距仅比近距慢 '+diff+'ms）。这通常意味着你在用<b>解析策略</b>：比较 A、B、★ 的坐标或数格子，而不是在脑中扫描图像。'+
+        '速度快往往是好事，但如果目标是训练图像检查本身，可以试着“先看见整条线，再顺着它看过去”。';
+    }
+    if(diff>150&&fit&&fit.slope>1){
+      note+=' 距差 '+diff+'ms 已超过常见的显著性门槛（约 150ms），可信度较高。';
+    }
+  }else{
+    note='试次不足，无法稳定分组。再打一局。';
+  }
+
+  $('#sumStats').innerHTML=stats.map(function(p){
+    return '<div class="stat"><div class="k">'+p[0]+'</div><div class="v">'+p[1]+'</div></div>';
+  }).join('');
+  $('#sumExtra').innerHTML=extra;
+  $('#sumNote').innerHTML=note;
+  $('#sumHint').textContent='共 '+n+' 试次 · 干扰模式：'+($('#intf').checked?'开':'关');
+  $('#summary').classList.remove('hidden');
+}
+
+document.addEventListener('keydown',function(e){
+  if(Scan.phase==='probe'){
+    if(['1','a','A','ArrowLeft'].indexOf(e.key)>=0){e.preventDefault();answer(true);}
+    if(['2','d','D','ArrowRight'].indexOf(e.key)>=0){e.preventDefault();answer(false);}
+  }
+});
+$('#againBtn').addEventListener('click',function(){
+  $('#summary').classList.add('hidden');
+  clearTimers();
+  session={trials:[],level:1,score:0,streak:0,correctRun:0,wrongRun:0,count:0};
+  updateHUD();
+  newTrial();
+});
+$('#theoryBtn').addEventListener('click',function(){$('#theory').classList.remove('hidden');});
+$('#theoryClose').addEventListener('click',function(){$('#theory').classList.add('hidden');});
+
+updateHUD();
+newTrial();
+</script>
+</body>
+</html>

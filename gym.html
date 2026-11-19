@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>心眼训练场 · 心理表象训练</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1100px 600px at 50% -12%, #17233a 0%, #0b0f14 62%);
+  color:#e8eef7;min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+.wrap{max-width:880px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:19px;margin:0;letter-spacing:.5px}
+h1 span{color:#5eead4}
+.sub{font-size:12px;color:#8b9bb0}
+.modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.modeBtn{
+  background:#121821;border:1px solid #243043;color:#8b9bb0;
+  padding:8px 14px;border-radius:11px;font-size:13px;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.modeBtn:hover{border-color:#33445e;color:#c7d4e5}
+.modeBtn.active{background:linear-gradient(140deg,#5eead4,#38bdf8);color:#06181a;border-color:transparent;font-weight:600}
+.hud{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{
+  background:#121821;border:1px solid #243043;border-radius:10px;
+  padding:6px 12px;font-size:12px;color:#8b9bb0;display:flex;gap:6px;align-items:center;
+}
+.chip b{color:#e8eef7;font-variant-numeric:tabular-nums}
+.panel{
+  background:rgba(18,24,33,.82);border:1px solid #243043;border-radius:20px;
+  padding:18px;backdrop-filter:blur(8px);
+}
+.hidden{display:none!important}
+.instr{
+  text-align:center;font-size:14px;line-height:1.7;color:#c7d4e5;
+  margin-bottom:14px;min-height:24px;
+}
+.instr em{color:#5eead4;font-style:normal;font-weight:600}
+#stageArea{min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.canvases{display:flex;gap:14px;width:100%;justify-content:center}
+.cvBox{flex:1;max-width:250px;position:relative}
+.cvBox canvas{width:100%;aspect-ratio:1;display:block;background:#0e141c;border-radius:16px;border:1px solid #1c2634}
+.cvBox .cvLabel{position:absolute;top:8px;left:11px;font-size:11px;color:#5a6b82;letter-spacing:1px}
+.cvBox.flashOK canvas{border-color:#34d399;box-shadow:0 0 22px rgba(52,211,153,.35)}
+.cvBox.flashBad canvas{border-color:#f87171;box-shadow:0 0 22px rgba(248,113,113,.35)}
+.answers{display:flex;gap:12px;justify-content:center;width:100%;max-width:430px}
+.answers button{
+  flex:1;padding:15px;border-radius:14px;border:1px solid #243043;background:#151d29;
+  color:#e8eef7;font-size:15px;cursor:pointer;font-family:inherit;transition:all .13s;
+}
+.answers button:hover{background:#1c2735;border-color:#3b5b7a}
+.answers button:active{transform:scale(.97)}
+.answers button small{display:block;color:#5a6b82;font-size:11px;margin-top:3px}
+.grid{
+  display:grid;grid-template-columns:repeat(var(--n),1fr);grid-auto-rows:1fr;
+  gap:6px;width:100%;max-width:300px;margin:0 auto;padding:8px;
+  background:#101720;border-radius:16px;border:1px solid #1c2634;aspect-ratio:1;
+}
+.cell{border-radius:8px;background:#0c1219;border:1px solid #1a2331;transition:all .12s}
+.cell.on{background:linear-gradient(140deg,#5eead4,#38bdf8);border-color:transparent}
+.cell.sel{background:linear-gradient(140deg,#818cf8,#c084fc);border-color:transparent;box-shadow:0 0 12px rgba(129,140,248,.45)}
+.cell.hit{background:linear-gradient(140deg,#34d399,#10b981);border-color:transparent}
+.cell.err{background:linear-gradient(140deg,#f87171,#ef4444);border-color:transparent}
+.cell.miss{border:2px dashed #fbbf24;background:transparent}
+.cell.clickable{cursor:pointer}
+.cell.clickable:hover{border-color:#3b5b7a;background:#131c27}
+.twoUp{display:flex;gap:14px;justify-content:center;width:100%}
+.twoUp .grid{max-width:148px;gap:4px;padding:6px}
+.studyBox{flex:1;max-width:160px;text-align:center}
+.studyBox .lab{font-size:12px;color:#5a6b82;margin-top:6px;letter-spacing:2px}
+.barWrap{width:100%;max-width:300px;height:4px;background:#1a2331;border-radius:99px;overflow:hidden}
+.bar{height:100%;width:100%;background:linear-gradient(90deg,#5eead4,#818cf8)}
+.controls{display:flex;gap:10px;justify-content:center;width:100%;max-width:340px}
+.controls button{
+  flex:1;padding:13px;border-radius:13px;border:1px solid #243043;background:#151d29;
+  color:#e8eef7;font-size:14px;cursor:pointer;font-family:inherit;transition:all .13s;
+}
+.controls button.primary{background:linear-gradient(140deg,#5eead4,#38bdf8);color:#06181a;border-color:transparent;font-weight:600}
+.controls button:hover{filter:brightness(1.12)}
+.controls button:active{transform:scale(.98)}
+.confRow{display:flex;gap:10px;justify-content:center;width:100%;max-width:360px;margin-top:4px}
+.confRow button{
+  flex:1;padding:11px 6px;border-radius:12px;border:1px solid #243043;background:#151d29;
+  color:#8b9bb0;font-size:13px;cursor:pointer;font-family:inherit;transition:all .13s;
+}
+.confRow button:hover{border-color:#3b5b7a;color:#e8eef7}
+.fb{text-align:center;font-size:14px;min-height:22px;font-weight:600;letter-spacing:.5px}
+.fb.ok{color:#34d399}
+.fb.bad{color:#f87171}
+.overlay{
+  position:fixed;inset:0;background:rgba(5,8,12,.82);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;
+}
+.sheet{
+  background:#111821;border:1px solid #243043;border-radius:22px;padding:24px;
+  max-width:520px;width:100%;max-height:86vh;overflow:auto;
+}
+.sheet h2{margin:0 0 4px;font-size:18px}
+.sheet .hint{font-size:12px;color:#5a6b82;margin-bottom:16px}
+.statGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:#0d141c;border:1px solid #1c2634;border-radius:13px;padding:12px}
+.stat .k{font-size:11px;color:#5a6b82;margin-bottom:5px}
+.stat .v{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:11px;color:#5a6b82;font-weight:400;margin-left:2px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 14px}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #1c2634;font-variant-numeric:tabular-nums}
+th{color:#5a6b82;font-weight:500;font-size:11px}
+.note{font-size:12.5px;color:#8b9bb0;line-height:1.8;background:#0d141c;border-left:2px solid #5eead4;border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:16px}
+.sheet .controls{max-width:none}
+footer{text-align:center;margin-top:18px;font-size:11px;color:#3f4d61}
+footer button{background:none;border:none;color:#5eead4;font-size:11px;cursor:pointer;text-decoration:underline;font-family:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>心眼训练场 <span>·</span> 心理表象训练</h1>
+    <div class="sub">旋转判断 / 变换重建 / 叠加重建</div>
+  </header>
+
+  <div class="modes">
+    <button class="modeBtn active" data-mode="judge">① 旋转判断（测速）</button>
+    <button class="modeBtn" data-mode="transform">② 变换重建</button>
+    <button class="modeBtn" data-mode="combine">③ 叠加重建</button>
+  </div>
+
+  <div class="hud">
+    <div class="chip">试次 <b id="hTrial">0/12</b></div>
+    <div class="chip">等级 <b id="hLevel">Lv.1</b></div>
+    <div class="chip">连击 <b id="hStreak">0</b></div>
+    <div class="chip">得分 <b id="hScore">0</b></div>
+  </div>
+
+  <div class="panel">
+    <div id="judgePanel">
+      <div class="instr" id="judgeInstr">右侧图形是左侧图形「旋转」后的结果吗？还是「镜像」？</div>
+      <div id="stageArea">
+        <div class="canvases">
+          <div class="cvBox" id="boxL"><canvas id="cvL"></canvas><span class="cvLabel">原图</span></div>
+          <div class="cvBox" id="boxR"><canvas id="cvR"></canvas><span class="cvLabel">候选</span></div>
+        </div>
+        <div class="answers">
+          <button data-ans="same">相同<small>旋转而已 · 按 1</small></button>
+          <button data-ans="diff">不同<small>被镜像过 · 按 2</small></button>
+        </div>
+        <div class="fb" id="judgeFb"></div>
+      </div>
+    </div>
+
+    <div id="rebuildPanel" class="hidden">
+      <div class="instr" id="rebuildInstr">记住图形，随后凭记忆重建</div>
+      <div id="stageArea">
+        <div id="studyZone"></div>
+        <div class="barWrap" id="studyBarWrap"><div class="bar" id="studyBar"></div></div>
+
+        <div id="playZone" class="hidden">
+          <div id="playGrid"></div>
+        </div>
+        <div id="controls" class="controls hidden">
+          <button id="clearBtn">清空</button>
+          <button id="submitBtn" class="primary">提交</button>
+        </div>
+        <div class="fb" id="rebuildFb"></div>
+        <div class="confRow hidden" id="confRow">
+          <button data-conf="1">刚才很模糊</button>
+          <button data-conf="2">一般</button>
+          <button data-conf="3">很清晰</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <button id="theoryBtn">理论依据与设计说明</button>
+  </footer>
+</div>
+
+<div class="overlay hidden" id="summary">
+  <div class="sheet">
+    <h2 id="sumTitle">本局报告</h2>
+    <div class="hint" id="sumHint"></div>
+    <div class="statGrid" id="sumStats"></div>
+    <div id="sumExtra"></div>
+    <div class="note" id="sumNote"></div>
+    <div class="controls">
+      <button id="againBtn" class="primary">再来一局</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="theory">
+  <div class="sheet">
+    <h2>设计说明 · 理论对应</h2>
+    <div class="hint">每个机制都指向某条理论</div>
+    <table>
+      <tr><th>机制</th><th>对应理论</th></tr>
+      <tr><td>旋转判断 + 角度0/45/90/135/180</td><td>Shepard–Metzler 心理旋转：RT 随角度线性增长，斜率倒数即旋转速度（经典值 ≈ 60°/秒）</td></tr>
+      <tr><td>遮蔽后重建，必须点击外部作答</td><td>客观校准：自评生动性与实际成绩相关仅 r≈0.2–0.3，必须用外化答案校准内部图像</td></tr>
+      <tr><td>提交后标注「对/错/漏」</td><td>误差信号驱动学习；避免在“自我感觉良好”里空转</td></tr>
+      <tr><td>每局难度随连对/连错上下浮动</td><td>渐进难度阶梯 + 能力边缘的适应性训练</td></tr>
+      <tr><td>变换题（旋转/镜像/平移）</td><td>L2 可控性：训练对表象的操作而非分辨率</td></tr>
+      <tr><td>叠加题（并集/交集）</td><td>Finke 心理综合（mental synthesis）：组合表象，训练客体表象的重组</td></tr>
+      <tr><td>「刚才有多清晰」三档自评</td><td>校准曲线：把主观生动性与客观正确率放在同一张表里对照</td></tr>
+      <tr><td>12 试次一局 + 结算报告</td><td>块状练习，便于观测学习曲线</td></tr>
+    </table>
+    <div class="note">
+      预期效应：变换重建的准确率与速度会在数局内明显上升（策略层 L3 + 操作层 L2）；
+      但「清晰度」自评通常变化很小（L1 生动性可塑性弱），这是正常的，不是训练失败。
+      真正该看的是：正确率是否上升、同一难度下的耗时是否下降、以及高自信与低自信时的正确率差距是否缩小。
+    </div>
+    <div class="controls"><button id="theoryClose" class="primary">明白了</button></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const randInt=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;};
+const K=(r,c)=>r+','+c;
+const pk=k=>k.split(',').map(Number);
+
+let timers=[];
+function after(ms,fn){const t=setTimeout(fn,ms);timers.push(t);return t;}
+function clearTimers(){timers.forEach(clearTimeout);timers=[];}
+
+const rot90=(s,N)=>{const o=new Set();for(const k of s){const p=pk(k);o.add(K(p[1],N-1-p[0]));}return o;};
+const rot180=(s,N)=>rot90(rot90(s,N),N);
+const rot270=(s,N)=>rot90(rot180(s,N),N);
+const flipH=(s,N)=>{const o=new Set();for(const k of s){const p=pk(k);o.add(K(p[0],N-1-p[1]));}return o;};
+const flipV=(s,N)=>{const o=new Set();for(const k of s){const p=pk(k);o.add(K(N-1-p[0],p[1]));}return o;};
+const shift=(s,dr,dc)=>{const o=new Set();for(const k of s){const p=pk(k);o.add(K(p[0]+dr,p[1]+dc));}return o;};
+const eqSet=(a,b)=>{if(a.size!==b.size)return false;for(const k of a)if(!b.has(k))return false;return true;};
+function bbox(s){let r0=99,r1=-1,c0=99,c1=-1;for(const k of s){const p=pk(k);r0=Math.min(r0,p[0]);r1=Math.max(r1,p[0]);c0=Math.min(c0,p[1]);c1=Math.max(c1,p[1]);}return{r0:r0,r1:r1,c0:c0,c1:c1};}
+
+function randPoly(N,k){
+  for(let att=0;att<80;att++){
+    const s=new Set();s.add(K(randInt(0,N-1),randInt(0,N-1)));
+    let g=0;
+    while(s.size<k&&g++<500){
+      const cands=[];
+      for(const key of s){const p=pk(key);
+        const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+        for(const d of dirs){
+          const nr=p[0]+d[0],nc=p[1]+d[1];
+          if(nr>=0&&nr<N&&nc>=0&&nc<N&&!s.has(K(nr,nc)))cands.push(K(nr,nc));
+        }}
+      if(!cands.length)break;
+      s.add(pick(cands));
+    }
+    if(s.size===k)return s;
+  }
+  return new Set([K(0,0),K(0,1),K(1,0)]);
+}
+function isSymmetric(s,N){return eqSet(s,rot90(s,N))||eqSet(s,flipH(s,N))||eqSet(s,flipV(s,N))||eqSet(s,rot180(s,N));}
+
+function buildGrid(N,clickable){
+  const g=document.createElement('div');
+  g.className='grid';
+  g.style.setProperty('--n',N);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const d=document.createElement('div');
+    d.className='cell'+(clickable?' clickable':'');
+    d.dataset.k=K(r,c);
+    g.appendChild(d);
+  }
+  return g;
+}
+function paintCls(g,set,cls){
+  g.querySelectorAll('.cell').forEach(el=>el.classList.toggle(cls,set.has(el.dataset.k)));
+}
+
+const TRIALS=12;
+let session={mode:'judge',trials:[],level:1,score:0,streak:0,correctRun:0,wrongRun:0,count:0};
+
+function updateHUD(){
+  $('#hTrial').textContent=session.count+'/'+TRIALS;
+  $('#hLevel').textContent='Lv.'+session.level;
+  $('#hStreak').textContent=session.streak;
+  $('#hScore').textContent=session.score;
+}
+
+function recordTrial(rec){
+  session.trials.push(rec);
+  session.count++;
+  if(rec.correct){
+    session.streak++;
+    session.correctRun++;session.wrongRun=0;
+    session.score+=Math.round(10*(1+session.streak*0.1));
+  }else{
+    session.streak=0;
+    session.wrongRun++;session.correctRun=0;
+  }
+  if(session.correctRun>=3&&session.level<8){session.level++;session.correctRun=0;}
+  if(session.wrongRun>=2&&session.level>1){session.level--;session.wrongRun=0;}
+  updateHUD();
+  if(session.count>=TRIALS){after(620,showSummary);return true;}
+  return false;
+}
+
+const Judge={pts:null,mi:0,angle:0,mirrored:false,t0:0,active:false,answered:false,block:[]};
+
+function makeAsymShape(){
+  const n=8,pts=[];
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2+(Math.random()-0.5)*0.26;
+    const r=0.58+Math.random()*0.42;
+    pts.push([Math.cos(a)*r,Math.sin(a)*r]);
+  }
+  const mi=randInt(0,n-1);
+  pts[mi][0]*=1.32;pts[mi][1]*=1.32;
+  return {pts:pts,mi:mi};
+}
+function nextAngle(){
+  if(!Judge.block.length)Judge.block=shuffle([0,45,90,135,180]);
+  return Judge.block.pop();
+}
+function drawShapeOn(cv,shape,angle,mirrored,color){
+  const dpr=window.devicePixelRatio||1;
+  const rect=cv.getBoundingClientRect();
+  if(rect.width<10)return;
+  cv.width=Math.round(rect.width*dpr);cv.height=Math.round(rect.height*dpr);
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w=rect.width,h=rect.height;
+  ctx.clearRect(0,0,w,h);
+  const pts=shape.pts,mi=shape.mi;
+  ctx.save();
+  ctx.translate(w/2,h/2);
+  ctx.rotate(angle*Math.PI/180);
+  if(mirrored)ctx.scale(-1,1);
+  const s=Math.min(w,h)*0.30;
+  ctx.beginPath();
+  pts.forEach((p,i)=>{ if(i)ctx.lineTo(p[0]*s,p[1]*s); else ctx.moveTo(p[0]*s,p[1]*s); });
+  ctx.closePath();
+  const grad=ctx.createLinearGradient(-s,-s,s,s);
+  grad.addColorStop(0,color);grad.addColorStop(1,color+'77');
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.lineWidth=Math.max(1.4,s*0.038);
+  ctx.strokeStyle='rgba(255,255,255,.88)';ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(pts[mi][0]*s,pts[mi][1]*s);
+  ctx.lineTo(pts[(mi+3)%pts.length][0]*s*0.52,pts[(mi+3)%pts.length][1]*s*0.52);
+  ctx.lineTo(pts[(mi+5)%pts.length][0]*s*0.52,pts[(mi+5)%pts.length][1]*s*0.52);
+  ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,.30)';ctx.fill();
+  ctx.restore();
+}
+function drawJudge(){
+  drawShapeOn($('#cvL'),{pts:Judge.pts,mi:Judge.mi},0,false,'#5eead4');
+  drawShapeOn($('#cvR'),{pts:Judge.pts,mi:Judge.mi},Judge.angle,Judge.mirrored,'#818cf8');
+}
+function newJudgeTrial(){
+  if(session.count>=TRIALS)return;
+  clearTimers();
+  $('#judgeFb').textContent='';$('#judgeFb').className='fb';
+  $('#boxL').className='cvBox';$('#boxR').className='cvBox';
+  const sh=makeAsymShape();
+  Judge.pts=sh.pts;Judge.mi=sh.mi;
+  Judge.angle=nextAngle();
+  Judge.mirrored=Math.random()<0.5;
+  Judge.answered=false;Judge.active=true;
+  drawJudge();
+  requestAnimationFrame(function(){Judge.t0=performance.now();});
+}
+function answerJudge(saysSame){
+  if(!Judge.active||Judge.answered)return;
+  Judge.answered=true;Judge.active=false;
+  const rt=performance.now()-Judge.t0;
+  const correct=(saysSame===(!Judge.mirrored));
+  $('#boxL').className='cvBox '+(correct?'flashOK':'flashBad');
+  $('#boxR').className='cvBox '+(correct?'flashOK':'flashBad');
+  const fb=$('#judgeFb');
+  fb.className='fb '+(correct?'ok':'bad');
+  fb.textContent=(correct?'✓ ':'✗ ')+(Judge.mirrored?'那是镜像（不是旋转）':'那确实是旋转');
+  const ended=recordTrial({mode:'judge',correct:correct,rt:rt,angle:Judge.angle});
+  if(!ended)after(760,newJudgeTrial);
+}
+
+const Rebuild={N:4,k:3,studyMs:2600,combine:false,kind:'',set:null,A:null,B:null,
+  expected:null,selected:new Set(),active:false,t0:0,pendingConf:null,answerLabel:''};
+
+function allowedKinds(level){
+  const list=['rot90','rot90'];
+  if(level>=2)list.push('flipH');
+  if(level>=3)list.push('rot180','rot270');
+  if(level>=4)list.push('flipV');
+  if(level>=5)list.push('shift');
+  return list;
+}
+const KIND_TEXT={
+  rot90:'顺时针旋转 90°',rot180:'旋转 180°',rot270:'顺时针旋转 270°（即逆时针 90°）',
+  flipH:'左右翻转（镜像）',flipV:'上下翻转（镜像）',shift:'整体平移'
+};
+
+function newRebuildTrial(combine){
+  if(session.count>=TRIALS)return;
+  clearTimers();
+  const lv=session.level;
+  Rebuild.combine=combine;
+  Rebuild.N=clamp(4+Math.floor((lv-1)/3),4,6);
+  Rebuild.k=clamp(3+Math.floor(lv/2),3,6);
+  Rebuild.studyMs=clamp(3000-lv*170,1200,3000);
+  Rebuild.selected=new Set();
+  $('#rebuildFb').textContent='';$('#rebuildFb').className='fb';
+  $('#confRow').classList.add('hidden');
+  $('#controls').classList.add('hidden');
+  $('#playZone').classList.add('hidden');
+  $('#studyZone').classList.remove('hidden');
+  $('#studyBarWrap').classList.remove('hidden');
+
+  if(combine){
+    let A,B;
+    for(let i=0;i<40;i++){
+      A=randPoly(Rebuild.N,Rebuild.k);
+      const bb=bbox(A);
+      const drs=[],dcs=[];
+      for(let d=-2;d<=2;d++){
+        if(bb.r0+d>=0&&bb.r1+d<Rebuild.N)drs.push(d);
+        if(bb.c0+d>=0&&bb.c1+d<Rebuild.N)dcs.push(d);
+      }
+      const dr=pick(drs),dc=pick(dcs);
+      if(dr===0&&dc===0)continue;
+      B=shift(A,dr,dc);
+      const inter=Array.from(A).filter(x=>B.has(x)).length;
+      if(inter>=1&&inter<A.size)break;
+    }
+    Rebuild.A=A;Rebuild.B=B;
+    const union=Math.random()<0.5;
+    Rebuild.expected=union?new Set(Array.from(A).concat(Array.from(B)))
+      :new Set(Array.from(A).filter(x=>B.has(x)));
+    Rebuild.answerLabel=union?'并集':'交集';
+  }else{
+    const kind=pick(allowedKinds(lv));
+    Rebuild.kind=kind;
+    let s,exp;
+    for(let i=0;i<40;i++){
+      s=randPoly(Rebuild.N,Rebuild.k);
+      if(isSymmetric(s,Rebuild.N))continue;
+      if(kind==='rot90')exp=rot90(s,Rebuild.N);
+      else if(kind==='rot180')exp=rot180(s,Rebuild.N);
+      else if(kind==='rot270')exp=rot270(s,Rebuild.N);
+      else if(kind==='flipH')exp=flipH(s,Rebuild.N);
+      else if(kind==='flipV')exp=flipV(s,Rebuild.N);
+      else{
+        const bb=bbox(s);
+        const drs=[],dcs=[];
+        for(let d=-2;d<=2;d++){
+          if(bb.r0+d>=0&&bb.r1+d<Rebuild.N)drs.push(d);
+          if(bb.c0+d>=0&&bb.c1+d<Rebuild.N)dcs.push(d);
+        }
+        let dr=pick(drs),dc=pick(dcs);
+        if(dr===0&&dc===0){
+          if(drs.length>1){const f=drs.filter(x=>x!==0);dr=pick(f);}
+          else{const f=dcs.filter(x=>x!==0);dc=pick(f.length?f:[0]);}
+        }
+        exp=shift(s,dr||0,dc||0);
+        Rebuild.shiftText='整体'+(dr>0?'向下'+dr+'格':dr<0?'向上'+(-dr)+'格':'')+(dr&&dc?'、':'')+(dc>0?'向右'+dc+'格':dc<0?'向左'+(-dc)+'格':'')+'移动';
+      }
+      if(!eqSet(exp,s))break;
+    }
+    Rebuild.set=s;Rebuild.expected=exp;
+  }
+  showStudy();
+}
+
+function showStudy(){
+  const z=$('#studyZone');z.innerHTML='';
+  if(Rebuild.combine){
+    const wrap=document.createElement('div');wrap.className='twoUp';
+    [['图形 A',Rebuild.A],['图形 B',Rebuild.B]].forEach(function(pair){
+      const lab=pair[0],set=pair[1];
+      const box=document.createElement('div');box.className='studyBox';
+      const g=buildGrid(Rebuild.N,false);paintCls(g,set,'on');
+      const l=document.createElement('div');l.className='lab';l.textContent=lab;
+      box.appendChild(g);box.appendChild(l);wrap.appendChild(box);
+    });
+    z.appendChild(wrap);
+    $('#rebuildInstr').innerHTML='记住这两个图形的位置 —— 随后请重建它们的 <em>'+
+      (Rebuild.answerLabel==='并集'?'并集':'交集')+'</em>';
+  }else{
+    const g=buildGrid(Rebuild.N,false);paintCls(g,Rebuild.set,'on');
+    z.appendChild(g);
+    $('#rebuildInstr').innerHTML='记住这个图形 —— 随后请想象把它 <em>'+
+      (Rebuild.kind==='shift'?Rebuild.shiftText:KIND_TEXT[Rebuild.kind])+'</em> 后的样子';
+  }
+  const bar=$('#studyBar');
+  bar.style.transition='none';bar.style.width='100%';
+  requestAnimationFrame(function(){
+    bar.style.transition='width '+Rebuild.studyMs+'ms linear';
+    bar.style.width='0%';
+  });
+  after(Rebuild.studyMs,showAnswerGrid);
+}
+
+function showAnswerGrid(){
+  $('#studyZone').classList.add('hidden');
+  $('#studyBarWrap').classList.add('hidden');
+  $('#playZone').classList.remove('hidden');
+  const pz=$('#playGrid');pz.innerHTML='';
+  const g=buildGrid(Rebuild.N,true);
+  pz.appendChild(g);
+  g.addEventListener('click',function(e){
+    const cell=e.target.closest('.cell');
+    if(!cell)return;
+    const k=cell.dataset.k;
+    if(Rebuild.selected.has(k)){Rebuild.selected.delete(k);cell.classList.remove('sel');}
+    else{Rebuild.selected.add(k);cell.classList.add('sel');}
+  });
+  Rebuild.active=true;
+  Rebuild.t0=performance.now();
+  $('#controls').classList.remove('hidden');
+  if(Rebuild.combine){
+    $('#rebuildInstr').innerHTML='凭记忆重建 <em>'+(Rebuild.answerLabel==='并集'?'并集':'交集')+'</em>：点击应该被占据的格子';
+  }else{
+    $('#rebuildInstr').innerHTML='点击格子，重建 <em>'+
+      (Rebuild.kind==='shift'?Rebuild.shiftText:KIND_TEXT[Rebuild.kind])+'</em> 之后的图形';
+  }
+}
+
+function submitRebuild(){
+  if(!Rebuild.active)return;
+  Rebuild.active=false;
+  const rt=performance.now()-Rebuild.t0;
+  const correct=eqSet(Rebuild.selected,Rebuild.expected);
+  $('#controls').classList.add('hidden');
+  const g=$('#playGrid .grid');
+  g.querySelectorAll('.cell').forEach(function(el){
+    const k=el.dataset.k;
+    const inSel=Rebuild.selected.has(k),inExp=Rebuild.expected.has(k);
+    el.classList.remove('sel');
+    if(inSel&&inExp)el.classList.add('hit');
+    else if(inSel&&!inExp)el.classList.add('err');
+    else if(!inSel&&inExp)el.classList.add('miss');
+  });
+  const fb=$('#rebuildFb');
+  fb.className='fb '+(correct?'ok':'bad');
+  if(correct){fb.textContent='✓ 完全正确';}
+  else{
+    let miss=0,err=0;
+    for(const k of Rebuild.expected)if(!Rebuild.selected.has(k))miss++;
+    for(const k of Rebuild.selected)if(!Rebuild.expected.has(k))err++;
+    fb.textContent='✗ 差 漏 '+miss+' 格 / 多 '+err+' 格';
+  }
+  Rebuild.pendingConf={correct:correct,rt:rt,level:session.level,combine:Rebuild.combine,
+    kind:Rebuild.combine?'combine':Rebuild.kind};
+  $('#confRow').classList.remove('hidden');
+}
+
+function onConf(v){
+  if(!Rebuild.pendingConf)return;
+  const p=Rebuild.pendingConf;
+  Rebuild.pendingConf=null;
+  $('#confRow').classList.add('hidden');
+  const ended=recordTrial({mode:Rebuild.combine?'combine':'transform',
+    correct:p.correct,rt:p.rt,confidence:v,level:p.level,kind:p.kind});
+  if(!ended)after(220,function(){newRebuildTrial(Rebuild.combine);});
+}
+
+function switchMode(m){
+  clearTimers();
+  Judge.active=false;Rebuild.active=false;Rebuild.pendingConf=null;
+  session={mode:m,trials:[],level:1,score:0,streak:0,correctRun:0,wrongRun:0,count:0};
+  document.querySelectorAll('.modeBtn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.mode===m);
+  });
+  $('#judgePanel').classList.toggle('hidden',m!=='judge');
+  $('#rebuildPanel').classList.toggle('hidden',m==='judge');
+  $('#summary').classList.add('hidden');
+  updateHUD();
+  if(m==='judge')newJudgeTrial();
+  else newRebuildTrial(m==='combine');
+}
+
+function linreg(xs,ys){
+  const n=xs.length;if(n<3)return null;
+  const mx=xs.reduce((a,b)=>a+b,0)/n, my=ys.reduce((a,b)=>a+b,0)/n;
+  let num=0,den=0;
+  for(let i=0;i<n;i++){num+=(xs[i]-mx)*(ys[i]-my);den+=(xs[i]-mx)*(xs[i]-mx);}
+  if(den===0)return null;
+  const b=num/den;return{slope:b,intercept:my-b*mx};
+}
+function showSummary(){
+  clearTimers();
+  const t=session.trials;
+  if(!t.length)return;
+  const n=t.length;
+  const accPct=Math.round(t.filter(x=>x.correct).length/n*100);
+  const avgRt=Math.round(t.reduce((a,b)=>a+b.rt,0)/n);
+  $('#sumTitle').textContent='本局报告 · '+
+    (session.mode==='judge'?'旋转判断':session.mode==='transform'?'变换重建':'叠加重建');
+
+  let stats=[
+    ['正确率',accPct+'<small>%</small>'],
+    ['平均耗时',(avgRt/1000).toFixed(1)+'<small>s</small>'],
+    ['最终等级','Lv.'+session.level],
+    ['得分',session.score]
+  ];
+
+  let extra='',note='';
+
+  if(session.mode==='judge'){
+    const xs=[],ys=[];
+    t.forEach(function(r){if(r.correct&&r.rt<12000){xs.push(r.angle);ys.push(r.rt);}});
+    const fit=linreg(xs,ys);
+    if(fit&&fit.slope>2){
+      const speed=Math.round(1000/fit.slope);
+      stats[3]=['旋转速度估算',speed+'<small>°/秒</small>'];
+      note='经典 Shepard–Metzler 研究得到的心理旋转速度约 60°/秒。你的估算值 '+speed+'°/秒'+
+        (speed>90?' 偏快——可能借助了局部特征匹配而非整体旋转':speed<35?' 偏慢——可能仍以逐点比对为主，可尝试整体“转过去”再判断':' 与文献量级相当')+
+        '。注意：这个数来自斜率而非截距，本身就排除了按键耗时的影响。';
+    }else{
+      note='有效数据点不足，无法拟合旋转斜率。多打几局（低角度与高角度都要有）才能得到稳定估算。';
+    }
+    extra='<div class="note" style="margin-top:0">斜率法：RT = 截距 + k×角度。截距反映知觉与按键，斜率才反映“转”本身。角度越大 RT 越长，说明你是真的在连续旋转，而不是逐特征比对。</div>';
+  }else{
+    const groups={1:[],2:[],3:[]};
+    t.forEach(function(r){if(r.confidence)groups[r.confidence].push(r.correct?1:0);});
+    const names={1:'很模糊',2:'一般',3:'很清晰'};
+    let rows='';
+    [1,2,3].forEach(function(c){
+      const g=groups[c];
+      const p=g.length?Math.round(g.reduce((a,b)=>a+b,0)/g.length*100):null;
+      rows+='<tr><td>'+names[c]+'</td><td>'+g.length+'</td><td>'+(p===null?'—':p+'%')+'</td></tr>';
+    });
+    extra='<table><tr><th>自评清晰度</th><th>试次</th><th>实际正确率</th></tr>'+rows+'</table>';
+    const hi=groups[3].length?groups[3].reduce((a,b)=>a+b,0)/groups[3].length:null;
+    const lo=groups[1].length?groups[1].reduce((a,b)=>a+b,0)/groups[1].length:null;
+    if(hi!==null&&lo!==null){
+      const gap=Math.round((hi-lo)*100);
+      note=gap<=15
+        ?'你的自评与成绩高度一致（高自信 vs 低自信差距仅 '+gap+' 个百分点），说明内部图像可信、校准良好。'
+        :'高自信时正确率仍比低自信时高 '+gap+' 个百分点——截至目前，你的“清晰感”还算可靠信号；若这个差距长期接近 0，则说明自评不可靠，应以客观成绩为准。';
+    }else{
+      note='自评样本还不够，多打几局才能看出清晰感与正确率是否同步。理论上两者相关仅 r≈0.2–0.3，出现“感觉清楚但做错”是常态。';
+    }
+  }
+
+  $('#sumStats').innerHTML=stats.map(function(p){
+    return '<div class="stat"><div class="k">'+p[0]+'</div><div class="v">'+p[1]+'</div></div>';
+  }).join('');
+  $('#sumExtra').innerHTML=extra;
+  $('#sumNote').innerHTML=note;
+  $('#sumHint').textContent='共 '+n+' 试次 · 等级随连对/连错自适应浮动';
+  $('#summary').classList.remove('hidden');
+}
+
+document.querySelectorAll('.modeBtn').forEach(function(b){
+  b.addEventListener('click',function(){switchMode(b.dataset.mode);});
+});
+document.querySelectorAll('.answers button').forEach(function(b){
+  b.addEventListener('click',function(){answerJudge(b.dataset.ans==='same');});
+});
+document.querySelectorAll('#confRow button').forEach(function(b){
+  b.addEventListener('click',function(){onConf(Number(b.dataset.conf));});
+});
+$('#submitBtn').addEventListener('click',submitRebuild);
+$('#clearBtn').addEventListener('click',function(){
+  Rebuild.selected.clear();
+  $('#playGrid').querySelectorAll('.cell').forEach(function(el){el.classList.remove('sel');});
+});
+$('#againBtn').addEventListener('click',function(){
+  $('#summary').classList.add('hidden');
+  switchMode(session.mode);
+});
+$('#theoryBtn').addEventListener('click',function(){$('#theory').classList.remove('hidden');});
+$('#theoryClose').addEventListener('click',function(){$('#theory').classList.add('hidden');});
+
+document.addEventListener('keydown',function(e){
+  if(session.mode==='judge'&&Judge.active){
+    if(e.key==='1'||e.key==='a'||e.key==='A'||e.key==='ArrowLeft'){e.preventDefault();answerJudge(true);}
+    if(e.key==='2'||e.key==='d'||e.key==='D'||e.key==='ArrowRight'){e.preventDefault();answerJudge(false);}
+  }
+  if(Rebuild.active&&e.key==='Enter'){e.preventDefault();submitRebuild();}
+});
+
+let rz;
+window.addEventListener('resize',function(){
+  clearTimeout(rz);
+  rz=setTimeout(function(){
+    if(session.mode==='judge'&&Judge.pts&&!Judge.answered)drawJudge();
+  },120);
+});
+
+switchMode('judge');
+</script>
+</body>
+</html>
