@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>可控性测验 · 链式变换</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1100px 620px at 50% -12%, #1a1430 0%, #08080e 62%);
+  color:#e8eef7;min-height:100vh;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+.wrap{max-width:780px;margin:0 auto;padding:20px 16px 44px}
+header{margin-bottom:16px}
+h1{font-size:19px;margin:0 0 4px;letter-spacing:.4px}
+h1 span{color:#c084fc}
+.sub{font-size:12px;color:#7d8ea6}
+.hud{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.chip{background:#141024;border:1px solid #2a2145;border-radius:10px;padding:6px 12px;font-size:12px;color:#7d8ea6}
+.chip b{color:#e8eef7;font-variant-numeric:tabular-nums}
+.panel{background:rgba(20,16,34,.85);border:1px solid #2a2145;border-radius:20px;padding:20px}
+#stage{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.hidden{display:none!important}
+.instr{text-align:center;font-size:14px;line-height:1.75;color:#c3d0e2;margin-bottom:14px;min-height:24px}
+.instr em{color:#c084fc;font-style:normal;font-weight:600}
+.instr b{color:#e8eef7}
+.method{max-width:600px}
+.method h3{margin:0 0 10px;font-size:15px}
+.method p{font-size:13px;line-height:1.9;color:#8b9bb0;margin:0 0 10px}
+.method b{color:#c7d4e5}
+.method .cite{font-size:11.5px;color:#5c6f88;font-style:italic}
+.btn{
+  padding:13px 30px;border-radius:13px;border:none;cursor:pointer;
+  background:linear-gradient(140deg,#c084fc,#818cf8);color:#12081f;
+  font-size:14px;font-weight:600;font-family:inherit;transition:all .13s;
+}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:#1a1430;color:#e8eef7;border:1px solid #2a2145;font-weight:400}
+.grid{
+  display:grid;grid-template-columns:repeat(var(--n),1fr);grid-auto-rows:1fr;
+  gap:6px;width:100%;max-width:300px;margin:0 auto;padding:8px;
+  background:#120f1e;border-radius:16px;border:1px solid #241c3b;aspect-ratio:1;
+}
+.cell{border-radius:8px;background:#0b0912;border:1px solid #1d1730;transition:all .12s}
+.cell.on{background:linear-gradient(140deg,#c084fc,#818cf8);border-color:transparent}
+.cell.sel{background:linear-gradient(140deg,#5eead4,#38bdf8);border-color:transparent}
+.cell.hit{background:linear-gradient(140deg,#34d399,#10b981);border-color:transparent}
+.cell.err{background:linear-gradient(140deg,#f87171,#ef4444);border-color:transparent}
+.cell.miss{border:2px dashed #fbbf24}
+.cell.clickable{cursor:pointer}
+.cell.clickable:hover{background:#141026}
+.qcard{
+  width:100%;max-width:440px;text-align:center;background:#120f1e;border:1px solid #241c3b;
+  border-radius:18px;padding:30px 22px;
+}
+.qcard .qt{font-size:16px;line-height:1.85;color:#e8eef7}
+.qcard .qn{font-size:11px;color:#5c6f88;letter-spacing:2px;margin-bottom:14px}
+.q3{display:flex;gap:10px;justify-content:center;width:100%;max-width:440px}
+.q3 button{
+  flex:1;padding:14px 6px;border-radius:13px;border:1px solid #2a2145;background:#1a1430;
+  color:#8b9bb0;font-size:13px;cursor:pointer;font-family:inherit;transition:all .13s;
+}
+.q3 button:hover{border-color:#4b3a7a;color:#e8eef7}
+.q3 button:active{transform:scale(.97)}
+.opcard{
+  width:100%;max-width:420px;text-align:center;background:linear-gradient(150deg,#1d1636,#141024);
+  border:1px solid #3b2c66;border-radius:18px;padding:36px 20px;
+  animation:opIn .35s ease both;
+}
+@keyframes opIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+.opcard .st{font-size:11px;color:#7c6aa8;letter-spacing:2px;margin-bottom:12px}
+.opcard .op{font-size:22px;font-weight:700;color:#e9d5ff;letter-spacing:1px}
+.dots{display:flex;gap:7px;justify-content:center;margin-top:18px}
+.dots i{width:7px;height:7px;border-radius:99px;background:#2f2450;display:block}
+.dots i.done{background:#c084fc}
+.dots i.now{background:#e9d5ff;box-shadow:0 0 10px rgba(192,132,252,.8)}
+.controls{display:flex;gap:10px;justify-content:center;width:100%;max-width:340px}
+.controls button{
+  flex:1;padding:13px;border-radius:13px;border:1px solid #2a2145;background:#1a1430;
+  color:#e8eef7;font-size:14px;cursor:pointer;font-family:inherit;
+}
+.controls button.primary{background:linear-gradient(140deg,#c084fc,#818cf8);color:#12081f;border-color:transparent;font-weight:600}
+.fb{text-align:center;font-size:14px;min-height:22px;font-weight:600}
+.fb.ok{color:#34d399}.fb.bad{color:#f87171}
+.res{max-width:600px;width:100%}
+.res h3{font-size:15px;margin:0 0 4px}
+.res .hint{font-size:12px;color:#5c6f88;margin-bottom:14px}
+.note{font-size:12.5px;color:#8b9bb0;line-height:1.9;background:#0f0c1a;border-left:2px solid #c084fc;border-radius:0 10px 10px 0;padding:11px 13px;margin:12px 0}
+.note b{color:#c7d4e5}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #241c3b;font-variant-numeric:tabular-nums}
+th{color:#5c6f88;font-weight:500;font-size:11px}
+.statGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.stat{background:#0f0c1a;border:1px solid #241c3b;border-radius:13px;padding:12px}
+.stat .k{font-size:11px;color:#5c6f88;margin-bottom:5px}
+.stat .v{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:11px;color:#5c6f88;font-weight:400;margin-left:2px}
+footer{text-align:center;margin-top:18px;font-size:11px;color:#3a3450}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>可控性测验 <span>·</span> 链式变换</h1>
+    <div class="sub">自评可控性 × 客观链式操作 · 参照 Gordon TVIC 结构</div>
+  </header>
+
+  <div class="hud">
+    <div class="chip">进度 <b id="hProg">—</b></div>
+    <div class="chip">阶段 <b id="hPhase">说明</b></div>
+    <div class="chip">链长 <b id="hChain">—</b></div>
+  </div>
+
+  <div class="panel">
+    <div class="instr" id="instr"></div>
+    <div id="stage"></div>
+  </div>
+
+  <footer>Part A 为 TVIC 结构的自编题，Part B 为可验证的链式变换任务</footer>
+</div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var randInt=function(a,b){return Math.floor(Math.random()*(b-a+1))+a};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+var K=function(r,c){return r+','+c};
+var pk=function(k){return k.split(',').map(Number)};
+
+var timers=[];
+function after(ms,fn){var t=setTimeout(fn,ms);timers.push(t);return t;}
+function clearAll(){timers.forEach(clearTimeout);timers=[];}
+
+var rot90=function(s,N){var o=new Set();s.forEach(function(k){var p=pk(k);o.add(K(p[1],N-1-p[0]));});return o;};
+var rot180=function(s,N){return rot90(rot90(s,N),N);};
+var rot270=function(s,N){return rot90(rot180(s,N),N);};
+var flipH=function(s,N){var o=new Set();s.forEach(function(k){var p=pk(k);o.add(K(p[0],N-1-p[1]));});return o;};
+var flipV=function(s,N){var o=new Set();s.forEach(function(k){var p=pk(k);o.add(K(N-1-p[0],p[1]));});return o;};
+var eqSet=function(a,b){if(a.size!==b.size)return false;var ok=true;a.forEach(function(k){if(!b.has(k))ok=false;});return ok;};
+
+var OPS=[
+  {id:'r90',text:'顺时针旋转 90°',fn:rot90},
+  {id:'r270',text:'逆时针旋转 90°',fn:rot270},
+  {id:'r180',text:'旋转 180°',fn:rot180},
+  {id:'fh',text:'左右翻转（镜像）',fn:flipH},
+  {id:'fv',text:'上下翻转（镜像）',fn:flipV}
+];
+
+function randPoly(N,k){
+  for(var att=0;att<80;att++){
+    var s=new Set();s.add(K(randInt(0,N-1),randInt(0,N-1)));
+    var g=0;
+    while(s.size<k&&g++<400){
+      var cands=[];
+      s.forEach(function(key){
+        var p=pk(key);
+        [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){
+          var nr=p[0]+d[0],nc=p[1]+d[1];
+          if(nr>=0&&nr<N&&nc>=0&&nc<N&&!s.has(K(nr,nc)))cands.push(K(nr,nc));
+        });
+      });
+      if(!cands.length)break;
+      s.add(pick(cands));
+    }
+    if(s.size===k)return s;
+  }
+  return new Set([K(0,0),K(0,1),K(1,0)]);
+}
+function isSym(s,N){
+  return eqSet(s,rot90(s,N))||eqSet(s,flipH(s,N))||eqSet(s,flipV(s,N))||eqSet(s,rot180(s,N));
+}
+function buildGrid(N){
+  var g=document.createElement('div');
+  g.className='grid';g.style.setProperty('--n',N);
+  for(var r=0;r<N;r++)for(var c=0;c<N;c++){
+    var d=document.createElement('div');
+    d.className='cell';d.dataset.k=K(r,c);
+    g.appendChild(d);
+  }
+  return g;
+}
+function paint(g,set,cls){
+  g.querySelectorAll('.cell').forEach(function(el){
+    el.classList.toggle(cls,set.has(el.dataset.k));
+  });
+}
+
+/* ============ Part A：自评题 ============ */
+var ITEMS=[
+  '想象一辆汽车，你能看清它的颜色和轮廓吗？',
+  '把刚才那辆车变成红色，做得到吗？',
+  '让它停到一条你熟悉的街道上，画面还在吗？',
+  '想象它慢慢开走，你能跟着它移动吗？',
+  '想象一只猫，然后让它突然跳起来。',
+  '想象一个朋友的脸，然后让他笑起来。',
+  '想象字母 B，然后把它变成镜子里的样子。',
+  '想象一扇关着的门，然后让它打开。',
+  '想象一个苹果，然后把它切成两半。',
+  '想象你的房间，然后把家具换一个位置。',
+  '想象一朵花苞，然后让它一瓣一瓣打开。',
+  '想象一个正在旋转的立方体，然后让它停下来。'
+];
+var A={i:0,ans:[]};
+
+function showIntro(){
+  clearAll();
+  $('#hPhase').textContent='说明';
+  $('#hProg').textContent='—';
+  $('#hChain').textContent='—';
+  $('#instr').textContent='';
+  $('#stage').innerHTML=
+    '<div class="method">'+
+    '<h3>测的是什么</h3>'+
+    '<p><b>生动性 ≠ 可控性。</b>有人图像很清晰，但完全动不了；有人图像模糊，却能精确地旋转、翻转、修改。'+
+    '前者是 VVIQ 测的东西，后者是这里要测的。</p>'+
+    '<p><b>Part A（12 题，自评）</b>：先在心里形成一个画面，再按要求<b>修改它</b>。'+
+    '这是 Gordon 的 TVIC 的结构——考的从来不是“能不能看见”，而是“能不能改”。</p>'+
+    '<p><b>Part B（8 题，客观）</b>：给你一个图形，遮蔽后<b>逐个</b>给出 2–3 个变换指令，'+
+    '最后点击变换完成后的样子。指令是一条链，你必须在前一步的图像上继续操作。</p>'+
+    '<div class="cite">改编自 Gordon, R. (1949). An investigation into some of the factors that favour the formation of stereotyped images.</div>'+
+    '</div>'+
+    '<button class="btn" id="startBtn">开始测验</button>';
+  $('#startBtn').addEventListener('click',function(){
+    A.i=0;A.ans=[];
+    showItem();
+  });
+}
+
+function showItem(){
+  clearAll();
+  if(A.i>=ITEMS.length){startPartB();return;}
+  $('#hPhase').textContent='Part A 自评';
+  $('#hProg').textContent=(A.i+1)+'/12';
+  $('#instr').innerHTML='在心里做完这件事，然后如实选择';
+  $('#stage').innerHTML=
+    '<div class="qcard"><div class="qn">第 '+(A.i+1)+' 题</div><div class="qt">'+ITEMS[A.i]+'</div></div>'+
+    '<div class="q3">'+
+    '<button data-v="3">能清楚做到</button>'+
+    '<button data-v="2">勉强能</button>'+
+    '<button data-v="1">做不到</button>'+
+    '</div>';
+  $('#stage').querySelectorAll('.q3 button').forEach(function(b){
+    b.addEventListener('click',function(){
+      A.ans.push(Number(b.dataset.v));
+      A.i++;
+      showItem();
+    });
+  });
+}
+
+/* ============ Part B：链式变换 ============ */
+var B={i:0,total:8,N:5,shape:null,ops:null,expected:null,selected:null,phase:'idle',data:[],t0:0};
+
+function startPartB(){
+  clearAll();
+  B.i=0;B.data=[];
+  $('#hPhase').textContent='Part B 操作';
+  $('#instr').innerHTML='先记住这个图形';
+  bTrial();
+}
+
+function bTrial(){
+  clearAll();
+  if(B.i>=B.total){showResult();return;}
+  var N=B.N;
+  B.selected=new Set();
+  B.phase='study';
+
+  var shape,ops,cur;
+  var guard=0;
+  do{
+    shape=randPoly(N,4);
+    if(isSym(shape,N)){guard++;continue;}
+    var len=(B.i<4)?2:3;
+    ops=[];
+    for(var j=0;j<len;j++)ops.push(pick(OPS));
+    cur=new Set(shape);
+    ops.forEach(function(o){cur=o.fn(cur,N);});
+    guard++;
+  }while((eqSet(cur,shape)||isSym(shape,N))&&guard<60);
+
+  B.shape=shape;B.ops=ops;B.expected=cur;
+  $('#hChain').textContent='链长 '+ops.length;
+  $('#hProg').textContent=(B.i+1)+'/'+B.total;
+
+  $('#stage').innerHTML='';
+  var g=buildGrid(N);
+  paint(g,shape,'on');
+  $('#stage').appendChild(g);
+  $('#instr').innerHTML='记住这个图形 —— 随后会逐个给出变换指令';
+
+  after(2000,function(){playOp(0);});
+}
+
+function playOp(idx){
+  if(idx>=B.ops.length){showAnswerGrid();return;}
+  B.phase='ops';
+  $('#hPhase').textContent='变换中';
+  $('#instr').innerHTML='在脑中<em>直接改</em>刚才那个图形，不要重新构造';
+  var dots='';
+  for(var i=0;i<B.ops.length;i++){
+    dots+='<i class="'+(i<idx?'done':i===idx?'now':'')+'"></i>';
+  }
+  $('#stage').innerHTML=
+    '<div class="opcard">'+
+    '<div class="st">第 '+(idx+1)+' / '+B.ops.length+' 步</div>'+
+    '<div class="op">'+B.ops[idx].text+'</div>'+
+    '<div class="dots">'+dots+'</div>'+
+    '</div>';
+  after(1500,function(){playOp(idx+1);});
+}
+
+function showAnswerGrid(){
+  B.phase='answer';
+  $('#hPhase').textContent='作答';
+  $('#instr').innerHTML='点击 <b>全部变换完成之后</b> 被占据的格子';
+  $('#stage').innerHTML='';
+  var g=buildGrid(B.N);
+  $('#stage').appendChild(g);
+  g.addEventListener('click',function(e){
+    var cell=e.target.closest('.cell');
+    if(!cell)return;
+    var k=cell.dataset.k;
+    if(B.selected.has(k)){B.selected.delete(k);cell.classList.remove('sel');}
+    else{B.selected.add(k);cell.classList.add('sel');}
+  });
+  var ctrl=document.createElement('div');
+  ctrl.className='controls';
+  ctrl.innerHTML='<button id="bclr">清空</button><button id="bsub" class="primary">提交</button>';
+  $('#stage').appendChild(ctrl);
+  var fb=document.createElement('div');
+  fb.className='fb';fb.id='bfb';
+  $('#stage').appendChild(fb);
+  $('#bclr').addEventListener('click',function(){
+    B.selected.clear();
+    g.querySelectorAll('.cell').forEach(function(el){el.classList.remove('sel');});
+  });
+  $('#bsub').addEventListener('click',bSubmit);
+  B.t0=performance.now();
+}
+
+function bSubmit(){
+  if(B.phase!=='answer')return;
+  B.phase='fb';
+  var rt=performance.now()-B.t0;
+  var correct=eqSet(B.selected,B.expected);
+  var g=$('#stage .grid');
+  g.querySelectorAll('.cell').forEach(function(el){
+    var k=el.dataset.k;
+    var inSel=B.selected.has(k),inExp=B.expected.has(k);
+    el.classList.remove('sel');
+    if(inSel&&inExp)el.classList.add('hit');
+    else if(inSel&&!inExp)el.classList.add('err');
+    else if(!inSel&&inExp)el.classList.add('miss');
+  });
+  var ctrl=$('#stage .controls');if(ctrl)ctrl.style.display='none';
+  var fb=$('#bfb');
+  fb.className='fb '+(correct?'ok':'bad');
+  if(correct)fb.textContent='✓ 完全正确';
+  else{
+    var miss=0,err=0;
+    B.expected.forEach(function(k){if(!B.selected.has(k))miss++;});
+    B.selected.forEach(function(k){if(!B.expected.has(k))err++;});
+    fb.textContent='✗ 漏 '+miss+' 格 / 多 '+err+' 格';
+  }
+  B.data.push({correct:correct,len:B.ops.length,rt:rt});
+  B.i++;
+  after(1400,bTrial);
+}
+
+/* ============ 结果 ============ */
+function showResult(){
+  clearAll();
+  $('#hPhase').textContent='结果';
+  $('#hProg').textContent='完成';
+  $('#instr').textContent='';
+
+  var selfTotal=A.ans.reduce(function(a,b){return a+b},0);
+  var selfMin=12,selfMax=36;
+  var selfPct=Math.round((selfTotal-selfMin)/(selfMax-selfMin)*100);
+  var objN=B.data.length;
+  var objC=B.data.filter(function(x){return x.correct}).length;
+  var objPct=objN?Math.round(objC/objN*100):0;
+  var chain2=B.data.filter(function(x){return x.len===2});
+  var chain3=B.data.filter(function(x){return x.len===3});
+  function rate(a){return a.length?Math.round(a.filter(function(x){return x.correct}).length/a.length*100):null;}
+
+  var lvl=selfPct>=67?'高':selfPct>=34?'中':'低';
+  var gap=selfPct-objPct;
+
+  var html='<div class="res"><h3>结果</h3>'+
+    '<div class="hint">Part A 12 题 · Part B '+objN+' 题</div>'+
+    '<div class="statGrid">'+
+    '<div class="stat"><div class="k">自评可控性</div><div class="v">'+selfTotal+'<small>/36 · '+lvl+'</small></div></div>'+
+    '<div class="stat"><div class="k">客观链式正确率</div><div class="v">'+objPct+'<small>%</small></div></div>'+
+    '</div>'+
+    '<table><tr><th>条件</th><th>题数</th><th>正确率</th></tr>'+
+    '<tr><td>2 步链</td><td>'+chain2.length+'</td><td>'+(rate(chain2)===null?'—':rate(chain2)+'%')+'</td></tr>'+
+    '<tr><td>3 步链</td><td>'+chain3.length+'</td><td>'+(rate(chain3)===null?'—':rate(chain3)+'%')+'</td></tr>'+
+    '</table>';
+
+  if(Math.abs(gap)<=20){
+    html+='<div class="note"><b>校准良好：</b>你的自评（'+selfPct+'%）与实际成绩（'+objPct+'%）相差 '+Math.abs(gap)+
+      ' 个百分点。说明你对“自己能不能控制图像”的判断是可靠的。</div>';
+  }else if(gap>20){
+    html+='<div class="note"><b>高估了 '+gap+' 个百分点：</b>你自评能清晰完成的修改，实际做起来会丢细节。'+
+      '这是可控性测验里最常见的结果——因为“觉得能”和“真的改对了”用的是两套判断。'+
+      '建议把注意力从“图像清不清楚”转到“每一步之后还剩几个格子对”。</div>';
+  }else{
+    html+='<div class="note"><b>低估了 '+(-gap)+' 个百分点：</b>实际做得比你以为的好。'+
+      '这通常说明你用的是空间/命题策略（记住相对关系而非画面），它比生动图像更稳，只是你不太把它当成“想象”。</div>';
+  }
+
+  html+='<div class="note"><b>为什么链式比单步难：</b>单步变换只需要一次正确操作；'+
+    '三步链要求你在<b>每一步之后都维持住当前图像</b>，而图像一旦在中间塌陷，后面两步就全错。'+
+    '2 步与 3 步的正确率差，就是你的“图像保持容量”的粗略指标。</div>'+
+    '<div class="controls"><button class="btn" id="againBtn">重新测一次</button></div></div>';
+
+  $('#stage').innerHTML=html;
+  $('#againBtn').addEventListener('click',showIntro);
+}
+
+document.addEventListener('keydown',function(e){
+  if(B.phase==='answer'&&e.key==='Enter'){e.preventDefault();bSubmit();}
+});
+
+showIntro();
+</script>
+</body>
+</html>
