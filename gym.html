@@ -365,9 +365,13 @@ function newJudgeTrial(){
   Judge.pts=sh.pts;Judge.mi=sh.mi;
   Judge.angle=nextAngle();
   Judge.mirrored=Math.random()<0.5;
-  Judge.answered=false;Judge.active=true;
+  Judge.answered=false;Judge.active=false;
+  const token=Judge.token=(Judge.token||0)+1;
   drawJudge();
-  requestAnimationFrame(function(){Judge.t0=performance.now();});
+  requestAnimationFrame(function(){
+    if(token!==Judge.token||session.mode!=='judge')return;
+    Judge.t0=performance.now();Judge.active=true;
+  });
 }
 function answerJudge(saysSame){
   if(!Judge.active||Judge.answered)return;
@@ -565,6 +569,7 @@ function onConf(v){
 
 function switchMode(m){
   clearTimers();
+  Judge.token=(Judge.token||0)+1;
   Judge.active=false;Rebuild.active=false;Rebuild.pendingConf=null;
   session={mode:m,trials:[],level:1,score:0,streak:0,correctRun:0,wrongRun:0,count:0};
   document.querySelectorAll('.modeBtn').forEach(function(b){

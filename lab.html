@@ -632,6 +632,8 @@ function svgLine(pts,xlab,ylab){
 /* ============ 切换 ============ */
 function switchExp(id){
   clearAll();
+  // Keyboard handlers must not address a trial from the previous tab.
+  E1.phase='idle';E2.phase='idle';E3.phase='idle';
   document.querySelectorAll('.tab').forEach(function(b){
     b.classList.toggle('active',b.dataset.exp===String(id));
   });
